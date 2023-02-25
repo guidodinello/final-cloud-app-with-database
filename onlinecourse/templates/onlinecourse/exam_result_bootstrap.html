@@ -54,9 +54,9 @@
             <!--HINT Display exam results-->
             {% for question in course.question_set.all %}
                 <div class="card mt-1">
-                    <div class="card-header d-flex justify-content-between align-items-center">
-                        <h5>{{ question.content }}</h5>
-                        <span>{{ question_scores|get_item:question.id  }} / {{ question.grade }}</span>
+                    <div class="card-header d-flex justify-content-between align-items-center row">
+                        <h5 class="col-10 m-0">{{ question.content }}</h5>
+                        <span class="col-2">{{ question_scores|get_item:question.id  }} / {{ question.grade }}</span>
                     </div>
                     <div class="form-group card-body">
                         {% for choice in question.choice_set.all %}
