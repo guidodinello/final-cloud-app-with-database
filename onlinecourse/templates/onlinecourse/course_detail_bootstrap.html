@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-     {% load static %}
+    {% load static %}
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
@@ -62,18 +62,39 @@
                 </div>
 
             -->
+            <button class="btn btn-info btn-block mt-3 mb-2" data-toggle="collapse" data-target="#exam">Exam</button>
 
             <!-- <HINT> If user is authenticated, show course exam with a list of question -->
-
-            <!-- <HINT> Each example will have many questions -->
-
-            <!-- <HINT> Each question will have many choices -->
-
-
+            {% if user.is_authenticated %}
             <!-- <HINT> Create a form to collect the selected choices for all questions -->
+                <form id="exam" class="collapse" action="" method="POST">
+                    {% csrf_token %}
+            <!-- <HINT> Each example will have many questions -->
+                    {% for question in course.question_set.all %}
+                        <div class="card mt-1">
+                            <div class="card-header"><h5>{{ question.content }}</h5></div>
+                            <div class="form-group card-body">
+            <!-- <HINT> Each question will have many choices -->
             <!-- <HINT> For each question choice, you may create a checkbox input like
             <input type="check" name="choice_{{choice.id}}" id="{{choice.id}}" ...>
             -->
+                                {% for choice in question.choice_set.all %}
+                                    <div class="form-check">
+                                        <label class="form-check-label">
+                                            <input type="checkbox" name="choice_{{choice.id}}"
+                                                class="form-check-input" id="{{choice.id}}"
+                                                value="{{choice.id}}">{{ choice.choice_text }}
+                                        </label>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    {% endfor %}
+                    <input class="btn btn-success btn-block my-2" type="submit" value="Submit">
+                </form>
+            {% endif %}
+
+
 
             <!-- A choice submission form example
             <form id="questionform" action="point to a submit view" method="post">
