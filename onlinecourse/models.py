@@ -75,7 +75,6 @@ class Lesson(models.Model):
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
     content = models.TextField()
 
-
 # Enrollment model
 # <HINT> Once a user enrolled a class, an enrollment entry should be created between the user and course
 # And we could use the enrollment to track information such as exam submissions
@@ -97,38 +96,45 @@ class Enrollment(models.Model):
 
 # <HINT> Create a Question Model with:
     # Used to persist question content for a course
-    # Has a One-To-Many (or Many-To-Many if you want to reuse questions) relationship with course
-    # Has a grade point for each question
+class Question(models.Model):
+    # Has a One-To-Many relationship with course
+    course = models.ForeignKey(Course, on_delete=models.CASCADE)
+    # ManyToOne relationship with Lesson
+    lesson = models.ForeignKey(Lesson, on_delete=models.CASCADE)
     # Has question content
+    content = models.TextField()
+    # Has a grade point for each question
+    grade = models.FloatField()
     # Other fields and methods you would like to design
-#class Question(models.Model):
-    # Foreign key to lesson
-    # question text
-    # question grade/mark
 
     # <HINT> A sample model method to calculate if learner get the score of the question
-    #def is_get_score(self, selected_ids):
-    #    all_answers = self.choice_set.filter(is_correct=True).count()
-    #    selected_correct = self.choice_set.filter(is_correct=True, id__in=selected_ids).count()
-    #    if all_answers == selected_correct:
-    #        return True
-    #    else:
-    #        return False
+    def is_get_score(self, selected_ids):
+       all_answers = self.choice_set.filter(is_correct=True).count()
+       selected_correct = self.choice_set.filter(is_correct=True, id__in=selected_ids).count()
+       if all_answers == selected_correct:
+           return True
+       else:
+           return False
 
 
 #  <HINT> Create a Choice Model with:
     # Used to persist choice content for a question
+class Choice(models.Model):
     # One-To-Many (or Many-To-Many if you want to reuse choices) relationship with Question
+    question = models.ForeignKey(Question, on_delete=models.CASCADE)
     # Choice content
+    choice_text = models.TextField()
     # Indicate if this choice of the question is a correct one or not
+    is_correct = models.BooleanField(default=False)
     # Other fields and methods you would like to design
-# class Choice(models.Model):
 
 # <HINT> The submission model
-# One enrollment could have multiple submission
-# One submission could have multiple choices
-# One choice could belong to multiple submissions
-#class Submission(models.Model):
-#    enrollment = models.ForeignKey(Enrollment, on_delete=models.CASCADE)
-#    choices = models.ManyToManyField(Choice)
+# ManyToOne relationship with Enrollment
+    # One enrollment could have multiple submission
+# ManyToMany relationship with Choice
+    # One submission could have multiple choices
+    # One choice could belong to multiple submissions
+class Submission(models.Model):
+   enrollment = models.ForeignKey(Enrollment, on_delete=models.CASCADE)
+   choices = models.ManyToManyField(Choice)
 #    Other fields and methods you would like to design
