@@ -107,14 +107,56 @@ class Question(models.Model):
     grade = models.FloatField()
     # Other fields and methods you would like to design
 
-    # <HINT> A sample model method to calculate if learner get the score of the question
-    def is_get_score(self, selected_ids):
-       all_answers = self.choice_set.filter(is_correct=True).count()
-       selected_correct = self.choice_set.filter(is_correct=True, id__in=selected_ids).count()
-       if all_answers == selected_correct:
-           return True
-       else:
-           return False
+    def get_score(self, selected_ids):
+        """
+        Return the score for the question based on the selected choices
+            It uses the award-penalty method
+        """
+        # from models import Case, When, Count
+        # # Define the two count expressions using conditional expressions
+        # selected_correct_expr = Count(Case(When(is_correct=True, then=1)))
+        # selected_not_correct_expr = Count(Case(When(is_correct=False, then=1)))
+
+        # # Retrieve the counts in a single query
+        # selected_choices = Choice.objects.filter(id__in=selected_ids)
+        # counts = selected_choices.aggregate(selected_correct=selected_correct_expr, selected_not_correct=selected_not_correct_expr)
+
+        # # Extract the counts from the result dictionary
+        # selected_correct = counts['selected_correct']
+        # selected_not_correct = counts['selected_not_correct']
+
+        all_choices = self.choice_set
+        selected_choices = self.choice_set.filter(id__in=selected_ids)
+        correct_choices = self.choice_set.filter(is_correct=True)
+        
+        correct = selected_choices.intersection(correct_choices)
+        incorrect = selected_choices.difference(correct_choices)
+
+        #  answer worth = total number of points assigned to the question divided by the total number of answer choices.
+        worth = self.grade / correct_choices.count()
+        
+        print("all choices: ", all_choices)
+        print("selected choices: ", selected_choices)
+        print("correct choices: ", correct_choices)
+        print("got_correct: ", correct)
+        print("got_incorrect: ", incorrect)
+
+        score = max(0, worth * ( correct.count() - incorrect.count() ) )
+        print(score)
+        return score
+    
+        
+
+        
+        # counts = selected_choices.aggregate(
+        #     selected_correct=models.Count(models.Case(models.When(is_correct=True, then=1))), 
+        #     selected_not_correct=models.Count(models.Case(models.When(is_correct=False, then=1)))
+        # )
+        # # Extract the counts from the result dictionary
+        # selected_correct = counts['selected_correct']
+        # selected_not_correct = counts['selected_not_correct']
+
+        return (selected_correct - selected_not_correct) / all_answers * self.grade
 
 
 #  <HINT> Create a Choice Model with:

@@ -124,6 +124,8 @@ def submit(request, course_id):
     user = request.user
     enrollment = Enrollment.objects.get(user=user, course=course)
 
+    print(request.POST)
+
     submitted_anwsers = []
     for key in request.POST:
         if key.startswith('choice'):
@@ -142,7 +144,30 @@ def submit(request, course_id):
         # Get the selected choice ids from the submission record
         # For each selected choice, check if it is a correct answer or not
         # Calculate the total score
-#def show_exam_result(request, course_id, submission_id):
+def show_exam_result(request, course_id, submission_id):
+    sub = get_object_or_404(Submission, pk=submission_id)
+    
+    # get questions and choices
+    selected_choices = sub.choices.all()
+    questions = Question.objects.filter(course_id=course_id)
+    
+    question_scores = {}
+    real_score, total_score = 0, 0
+    for question in questions:
+        question_score = question.get_score(selected_choices)
 
+        question_scores[question.id] = question_score
+        real_score += question_score
+        total_score += question.grade
+
+    context = {
+        'course': get_object_or_404(Course, pk=course_id),
+        'selected_choices': selected_choices,
+        'username' : request.user.username,
+        'submission': sub,
+        'exam_grade': (real_score / total_score) * 100,
+        'question_scores': question_scores,
+    }
+    return render(request, 'onlinecourse/exam_result_bootstrap.html', context)
 
 
